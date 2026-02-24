@@ -40,6 +40,7 @@ export const createProposal  = data          => API.post('/proposals', data);
 export const getProposal     = id            => API.get(`/proposals/${id}`);
 export const getWorkflow     = id            => API.get(`/proposals/${id}/workflow`);
 export const getProposalAudit= id            => API.get(`/proposals/${id}/audit`);
+export const getProposalAnalysis = id        => API.get(`/proposals/${id}/analysis`);
 export const deleteProposal  = id            => API.delete(`/proposals/${id}`);
 
 // ── Approvals ─────────────────────────────────────────────────────────────

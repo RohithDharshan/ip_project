@@ -7,6 +7,7 @@ GET    /proposals/{id}          — get single proposal
 PATCH  /proposals/{id}/status   — update status
 DELETE /proposals/{id}          — delete (draft only)
 GET    /proposals/{id}/agent-trace — get AI agent trace
+GET    /proposals/{id}/analysis  — full AI risk & compliance analysis
 """
 
 from typing import List, Optional
@@ -21,12 +22,18 @@ from sqlalchemy.orm import selectinload
 from database import get_db
 from models.workflow import Proposal, WorkflowStep, User, ProposalStatus, EventType
 from agents.orchestrator import AgentOrchestrator
+from agents.proposal_agent import ProposalAgent
+from agents.compliance_agent import ComplianceAgent
+from agents.routing_agent import RoutingAgent
 from services.audit_service import AuditService
 from services.email_service import EmailService
 from routers.auth import get_current_user
 
-router      = APIRouter(prefix="/proposals", tags=["proposals"])
+router       = APIRouter(prefix="/proposals", tags=["proposals"])
 orchestrator = AgentOrchestrator()
+_proposal_agent  = ProposalAgent()
+_compliance_agent = ComplianceAgent()
+_routing_agent    = RoutingAgent()
 
 
 # ── Pydantic Schemas ──────────────────────────────────────────────────────────
@@ -242,6 +249,67 @@ async def get_audit(
         }
         for l in logs
     ]
+
+
+@router.get("/{proposal_id}/analysis")
+async def get_analysis(
+    proposal_id:  int,
+    db:           AsyncSession = Depends(get_db),
+    current_user: User         = Depends(get_current_user),
+):
+    """
+    Full AI risk & compliance analysis for a proposal.
+    Re-runs the agent pipeline on stored data and returns:
+      - risk breakdown with factors + mitigations
+      - compliance check (issues + warnings)
+      - routing explanation
+      - budget analysis
+    """
+    result = await db.execute(select(Proposal).where(Proposal.id == proposal_id))
+    proposal = result.scalar_one_or_none()
+    if not proposal:
+        raise HTTPException(status_code=404, detail="Proposal not found.")
+
+    # Build proposal data dict for the agents
+    proposal_data = {
+        "title":              proposal.title,
+        "description":        proposal.description,
+        "event_type":         proposal.event_type.value if proposal.event_type else "other",
+        "budget":             float(proposal.budget or 0),
+        "requirements":       proposal.requirements,
+        "venue":              proposal.venue,
+        "expected_date":      proposal.expected_date,
+        "expected_attendees": proposal.expected_attendees or 50,
+        "ai_intent":          proposal.ai_intent,
+        "ai_risk_level":      proposal.ai_risk_level or "low",
+        "ai_budget_cat":      proposal.ai_budget_cat or "small",
+        "ai_routing_path":    proposal.ai_routing_path or [],
+    }
+
+    # Compliance check
+    compliance = _compliance_agent.validate(proposal_data, [])
+
+    # Risk analysis
+    risk = _proposal_agent.analyze_risks(proposal_data)
+
+    # Routing explanation
+    steps   = _routing_agent.compute_routing(proposal_data)
+    routing_explanation = _routing_agent.explain_routing(proposal_data, steps)
+
+    return {
+        "risk":       risk,
+        "compliance": compliance,
+        "routing": {
+            "explanation": routing_explanation,
+            "path":        proposal.ai_routing_path or [],
+        },
+        "ai_intent":     proposal.ai_intent,
+        "ai_budget_cat": proposal.ai_budget_cat,
+        "ai_summary":    (
+            f"Event: {proposal.ai_intent}. Budget category: {proposal.ai_budget_cat or 'small'} "
+            f"(₹{float(proposal.budget or 0):,.0f}). Risk: {proposal.ai_risk_level or 'low'}."
+        ),
+    }
 
 
 @router.delete("/{proposal_id}", status_code=204)
