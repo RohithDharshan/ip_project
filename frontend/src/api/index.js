@@ -9,11 +9,13 @@ API.interceptors.request.use(cfg => {
   return cfg;
 });
 
-// Auto-logout on 401
+// Auto-logout on 401 (only for authenticated requests, not the login call itself)
 API.interceptors.response.use(
   r => r,
   err => {
-    if (err.response?.status === 401) {
+    const is401 = err.response?.status === 401;
+    const isLoginCall = err.config?.url?.includes('/auth/login');
+    if (is401 && !isLoginCall && localStorage.getItem('token')) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/login';

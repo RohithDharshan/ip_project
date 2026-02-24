@@ -93,6 +93,9 @@ async def create_vendor(
     return vendor
 
 
+# NOTE: /recommend and /procurement/{id} MUST be declared before /{vendor_id}
+# so FastAPI does not match "recommend" as a vendor ID integer (it will 422, not 404,
+# but still we keep static routes first as best practice).
 @router.get("/recommend", response_model=dict)
 async def recommend_vendors(
     category:     Optional[str] = Query(None),

@@ -150,7 +150,10 @@ textarea        { resize: vertical; min-height: 90px; }
 .wf-dot.approved{ background: #e8f5e9; color: var(--success); border: 2px solid var(--success); }
 .wf-dot.pending { background: #fff3e0; color: var(--warning); border: 2px solid var(--warning); }
 .wf-dot.rejected{ background: #ffebee; color: var(--danger); border: 2px solid var(--danger); }
-.wf-dot.default { background: #f3f4f6; color: var(--text-muted); border: 2px solid var(--border); }
+.wf-dot.default             { background: #f3f4f6; color: var(--text-muted); border: 2px solid var(--border); }
+.wf-dot.clarification_requested { background: #fff3e0; color: var(--warning); border: 2px solid var(--warning); }
+.wf-dot.skipped             { background: #f3f4f6; color: var(--text-muted); border: 2px dashed var(--border); }
+.wf-dot.revision_requested  { background: #e3f2fd; color: #1565c0; border: 2px solid #1565c0; }
 .wf-content     { flex: 1; }
 .wf-role        { font-weight: 600; font-size: .9rem; }
 .wf-name        { color: var(--text-muted); font-size: .8rem; }

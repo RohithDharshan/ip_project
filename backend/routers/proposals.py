@@ -93,8 +93,8 @@ async def list_proposals(
     if event_type:
         q = q.where(Proposal.event_type == event_type)
 
-    # Non-admin users see only their own proposals; coordinators and above see all
-    if current_user.role.value == "faculty":
+    # Faculty see only their own proposals; all other roles see all proposals
+    if current_user.role.value in ("faculty", "coordinator"):
         q = q.where(Proposal.submitted_by == current_user.id)
 
     result = await db.execute(q)

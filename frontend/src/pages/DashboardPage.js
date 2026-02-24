@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getOverview, getDashboard, getProposals, getAuditLog } from '../api';
+import { getOverview, getProposals, getAuditLog } from '../api';
 import { useAuth } from '../App';
 import { statusBadge, formatCurrency, formatDate } from '../utils';
 

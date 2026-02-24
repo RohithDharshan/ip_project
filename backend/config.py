@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     ERP_BASE_URL: str = "https://erp.iics.ac.in/api"
     ERP_API_KEY: str = ""
 
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 480  # 8 hours
     ALGORITHM: str = "HS256"
 
     class Config:

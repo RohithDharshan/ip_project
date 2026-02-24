@@ -37,7 +37,7 @@ export default function ProposalsPage() {
           <h1>📋 Proposals</h1>
           <p>All institutional event proposals</p>
         </div>
-        {user?.role === 'faculty' && (
+        {(user?.role === 'faculty' || user?.role === 'coordinator') && (
           <button className="btn btn-primary" onClick={() => navigate('/proposals/new')}>
             ➕ New Proposal
           </button>
@@ -66,7 +66,7 @@ export default function ProposalsPage() {
           <div className="empty-state">
             <div className="icon">📋</div>
             <p>No proposals found.</p>
-            {user?.role === 'faculty' && (
+            {(user?.role === 'faculty' || user?.role === 'coordinator') && (
               <button className="btn btn-primary mt-4" onClick={() => navigate('/proposals/new')}>
                 Submit Your First Proposal
               </button>

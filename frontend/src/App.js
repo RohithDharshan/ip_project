@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, NavLink, useNavigate } from 'react-router-dom';
-import { getMe } from './api';
+import { getMe } from './api'; // used for session re-validation on load
 
 // ── Pages ──────────────────────────────────────────────────────────────────
 import LoginPage      from './pages/LoginPage';
@@ -22,11 +22,26 @@ function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const token  = localStorage.getItem('token');
     const stored = localStorage.getItem('user');
-    if (stored) {
+    if (token && stored) {
+      // Optimistically restore from cache, then re-validate with server
       try { setUser(JSON.parse(stored)); } catch {}
+      getMe()
+        .then(res => {
+          setUser(res.data);
+          localStorage.setItem('user', JSON.stringify(res.data));
+        })
+        .catch(() => {
+          // Token expired or invalid — force re-login
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          setUser(null);
+        })
+        .finally(() => setLoading(false));
+    } else {
+      setLoading(false);
     }
-    setLoading(false);
   }, []);
 
   const logout = () => {
