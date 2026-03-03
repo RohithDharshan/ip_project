@@ -34,10 +34,10 @@ export default function ApprovalsPage() {
     setSubmitting(true);
     try {
       await decide(modal.id, { decision, comments });
-      setFeedback(`✅ Decision recorded: ${decision}`);
+      setFeedback(`Decision recorded: ${decision}`);
       setTimeout(() => { closeModal(); load(); }, 1200);
     } catch (err) {
-      setFeedback(`❌ ${err.response?.data?.detail || 'Error submitting decision.'}`);
+      setFeedback(err.response?.data?.detail || 'Error submitting decision.');
     } finally {
       setSubmitting(false);
     }
@@ -46,7 +46,7 @@ export default function ApprovalsPage() {
   return (
     <div>
       <div className="page-header">
-        <h1>✅ Approvals</h1>
+        <h1>Approvals</h1>
         <p>Review and decide on pending workflow steps</p>
       </div>
 
@@ -63,10 +63,10 @@ export default function ApprovalsPage() {
       <div className="card">
         <div className="card-title">Pending Approvals for Your Role</div>
         {loading ? (
-          <div className="loading">⏳ Loading…</div>
+          <div className="loading">Loading…</div>
         ) : pending.length === 0 ? (
           <div className="empty-state">
-            <div className="icon">🎉</div>
+            <div className="icon"></div>
             <p>No pending approvals at this time.</p>
           </div>
         ) : (
@@ -124,9 +124,9 @@ export default function ApprovalsPage() {
               <label>Decision *</label>
               <div className="flex gap-2">
                 {[
-                  { v: 'approved',                label: '✅ Approve',      cls: 'btn-success' },
-                  { v: 'rejected',                label: '❌ Reject',       cls: 'btn-danger'  },
-                  { v: 'clarification_requested', label: '❓ Clarify',      cls: 'btn-warning' },
+                  { v: 'approved',                label: 'Approve',   cls: 'btn-success' },
+                  { v: 'rejected',                label: 'Reject',    cls: 'btn-danger'  },
+                  { v: 'clarification_requested', label: 'Clarify',   cls: 'btn-warning' },
                 ].map(d => (
                   <button
                     key={d.v}
@@ -148,7 +148,7 @@ export default function ApprovalsPage() {
             </div>
 
             {feedback && (
-              <div className={`alert ${feedback.startsWith('✅') ? 'alert-success' : 'alert-error'}`}>
+              <div className={`alert ${feedback.includes('Error') || feedback.includes('error') ? 'alert-error' : 'alert-success'}`}>
                 {feedback}
               </div>
             )}

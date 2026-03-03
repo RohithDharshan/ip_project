@@ -29,7 +29,7 @@ export default function VendorsPage() {
   return (
     <div>
       <div className="page-header">
-        <h1>🏪 Vendor Intelligence</h1>
+        <h1>Vendor Intelligence</h1>
         <p>AI-powered vendor scoring and recommendation engine</p>
       </div>
 
@@ -48,7 +48,7 @@ export default function VendorsPage() {
             ))}
           </div>
           <button className="btn btn-primary btn-sm" onClick={handleRecommend}>
-            🤖 AI Recommend
+            AI Recommend
           </button>
         </div>
       </div>
@@ -57,7 +57,7 @@ export default function VendorsPage() {
       {ranked && (
         <div className="card mb-4" style={{ borderLeft: '4px solid #00bcd4' }}>
           <div className="flex-between mb-4">
-            <div className="card-title" style={{ margin: 0 }}>🏆 AI Top Recommendation</div>
+            <div className="card-title" style={{ margin: 0 }}>AI Top Recommendation</div>
             <button className="btn btn-outline btn-sm" onClick={() => setRanked(null)}>✕ Close</button>
           </div>
           <div className="alert alert-info" style={{ marginBottom: 16 }}>
@@ -97,9 +97,9 @@ export default function VendorsPage() {
       <div className="card">
         <div className="card-title">All Vendors ({vendors.length})</div>
         {loading ? (
-          <div className="loading">⏳ Loading vendors…</div>
+          <div className="loading">Loading vendors…</div>
         ) : vendors.length === 0 ? (
-          <div className="empty-state"><div className="icon">🏪</div><p>No vendors found.</p></div>
+          <div className="empty-state"><div className="icon"></div><p>No vendors found.</p></div>
         ) : (
           <div className="table-wrap">
             <table>

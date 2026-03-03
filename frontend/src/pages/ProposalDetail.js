@@ -35,14 +35,14 @@ export default function ProposalDetail() {
     }
   }, [activeTab, id, analysis, analysisLoading]);
 
-  if (loading) return <div className="loading">⏳ Loading proposal…</div>;
+  if (loading) return <div className="loading">Loading proposal…</div>;
   if (!proposal) return <div className="alert alert-error">Proposal not found.</div>;
 
   const TABS = [
-    { id: 'overview',   label: '📋 Overview' },
-    { id: 'workflow',   label: '🔀 Workflow' },
-    { id: 'ai',         label: '🤖 AI Analysis' },
-    { id: 'audit',      label: '🔍 Audit Trail' },
+    { id: 'overview',   label: 'Overview' },
+    { id: 'workflow',   label: 'Workflow' },
+    { id: 'ai',         label: 'AI Analysis' },
+    { id: 'audit',      label: 'Audit Trail' },
   ];
 
   return (
@@ -131,7 +131,7 @@ export default function ProposalDetail() {
         <div>
           {analysisLoading && (
             <div className="card" style={{ textAlign: 'center', padding: 40 }}>
-              <div style={{ fontSize: '2rem', marginBottom: 8 }}>🤖</div>
+              <div style={{ fontWeight: 600, marginBottom: 8, color: '#374151' }}>Analysing proposal…</div>
               <div className="text-muted">Running AI analysis…</div>
             </div>
           )}
@@ -157,9 +157,7 @@ export default function ProposalDetail() {
                 {/* ── Risk Level Banner ─────────────────────────────────── */}
                 <div className="card mb-4" style={{ borderLeft: `5px solid ${riskColor}`, background: riskBg }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
-                    <div style={{ fontSize: '2.5rem' }}>
-                      {rl === 'high' ? '🔴' : rl === 'medium' ? '🟡' : '🟢'}
-                    </div>
+                    <div style={{ width: 16, height: 16, borderRadius: '50%', background: riskColor, flexShrink: 0 }} />
                     <div style={{ flex: 1 }}>
                       <div style={{ fontWeight: 700, fontSize: '1.1rem', color: riskColor, textTransform: 'uppercase', letterSpacing: 1 }}>
                         {rl} Risk
@@ -180,7 +178,7 @@ export default function ProposalDetail() {
                 {/* ── Budget Analysis Bar ───────────────────────────────── */}
                 {risk?.budget_analysis && (
                   <div className="card mb-4">
-                    <div className="card-title">💰 Budget Analysis</div>
+                    <div className="card-title">Budget Analysis</div>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(170px,1fr))', gap: 16, marginBottom: 16 }}>
                       <div>
                         <div className="text-muted text-sm">Requested</div>
@@ -219,13 +217,13 @@ export default function ProposalDetail() {
 
                 {/* ── Overall Mitigation ────────────────────────────────── */}
                 <div className="card mb-4" style={{ borderLeft: `4px solid ${riskColor}` }}>
-                  <div className="card-title">🛡️ Overall Risk Assessment &amp; Recommendation</div>
+                  <div className="card-title">Overall Risk Assessment &amp; Recommendation</div>
                   <p style={{ lineHeight: 1.8, color: '#374151' }}>{risk?.overall_mitigation}</p>
                 </div>
 
                 {/* ── Risk Factors ──────────────────────────────────────── */}
                 <div className="card mb-4">
-                  <div className="card-title">⚠️ Risk Factors &amp; Mitigation Steps</div>
+                  <div className="card-title">Risk Factors &amp; Mitigation Steps</div>
                   {(risk?.risk_factors || []).length === 0 ? (
                     <div className="text-muted">No risk factors identified.</div>
                   ) : (
@@ -279,7 +277,7 @@ export default function ProposalDetail() {
                 {/* ── Compliance Check ──────────────────────────────────── */}
                 <div className="card mb-4">
                   <div className="card-title">
-                    {compliance?.passed ? '✅' : '❌'} Compliance Check
+                    Compliance Check
                     <span style={{
                       marginLeft: 10, fontSize: '.75rem', fontWeight: 700, padding: '2px 10px',
                       borderRadius: 20,
@@ -329,7 +327,7 @@ export default function ProposalDetail() {
 
                 {/* ── Routing Explanation ───────────────────────────────── */}
                 <div className="card mb-4">
-                  <div className="card-title">🔀 Approval Routing Rationale</div>
+                  <div className="card-title">Routing Rationale</div>
                   <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
                     {(routing?.path || []).map((role, i) => (
                       <span key={i} className="chip" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -350,7 +348,7 @@ export default function ProposalDetail() {
 
       {activeTab === 'audit' && (
         <div className="card">
-          <div className="card-title">🔍 Audit Trail</div>
+          <div className="card-title">Audit Trail</div>
           {auditLogs.length === 0 ? (
             <div className="text-muted">No audit entries.</div>
           ) : (

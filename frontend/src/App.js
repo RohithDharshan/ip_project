@@ -73,12 +73,12 @@ function ProtectedRoute({ children }) {
 
 // ── Sidebar ────────────────────────────────────────────────────────────────
 const NAV_ITEMS = [
-  { path: '/',          label: 'Dashboard',  icon: '📊', roles: null },
-  { path: '/proposals', label: 'Proposals',  icon: '📋', roles: null },
-  { path: '/approvals', label: 'Approvals',  icon: '✅', roles: ['coordinator','hod','programme_manager','principal','bursar','admin'] },
-  { path: '/vendors',   label: 'Vendors',    icon: '🏪', roles: null },
-  { path: '/analytics', label: 'Analytics',  icon: '📈', roles: null },
-  { path: '/audit',     label: 'Audit Log',  icon: '🔍', roles: ['admin','principal','bursar'] },
+  { path: '/',          label: 'Dashboard',  roles: null },
+  { path: '/proposals', label: 'Proposals',  roles: null },
+  { path: '/approvals', label: 'Approvals',  roles: ['coordinator','hod','programme_manager','principal','bursar','admin'] },
+  { path: '/vendors',   label: 'Vendors',    roles: null },
+  { path: '/analytics', label: 'Analytics',  roles: null },
+  { path: '/audit',     label: 'Audit Log',  roles: ['admin','principal','bursar'] },
 ];
 
 function Sidebar() {
@@ -93,7 +93,7 @@ function Sidebar() {
   return (
     <aside className="sidebar">
       <div className="sidebar-logo">
-        <h2>🤖 AgentFlow</h2>
+        <h2>AgentFlow</h2>
         <small>PSG AI Consortium</small>
       </div>
 
@@ -113,8 +113,7 @@ function Sidebar() {
             end={item.path === '/'}
             className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
           >
-            <span className="icon">{item.icon}</span>
-            {item.label}
+              {item.label}
           </NavLink>
         ))}
       </nav>
@@ -125,7 +124,7 @@ function Sidebar() {
           style={{ width: '100%', color: 'rgba(255,255,255,.8)', border: '1px solid rgba(255,255,255,.3)' }}
           onClick={handleLogout}
         >
-          🚪 Logout
+          Logout
         </button>
       </div>
     </aside>

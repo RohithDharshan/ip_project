@@ -36,9 +36,9 @@ export function statusBadge(status) {
 // ── Risk badge ─────────────────────────────────────────────────────────────
 export function riskBadge(risk) {
   const map = {
-    low:    { cls: 'badge-success', label: '🟢 Low' },
-    medium: { cls: 'badge-warning', label: '🟡 Medium' },
-    high:   { cls: 'badge-danger',  label: '🔴 High' },
+    low:    { cls: 'badge-success', label: 'Low' },
+    medium: { cls: 'badge-warning', label: 'Medium' },
+    high:   { cls: 'badge-danger',  label: 'High' },
   };
   const cfg = map[String(risk).toLowerCase()] || { cls: 'badge-neutral', label: risk };
   return <span className={`badge ${cfg.cls}`}>{cfg.label}</span>;

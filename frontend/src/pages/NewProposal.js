@@ -35,7 +35,7 @@ export default function NewProposal() {
     setLoading(true);
     try {
       const res = await createProposal({ ...form, budget: parseFloat(form.budget), expected_attendees: parseInt(form.expected_attendees) });
-      setSuccess(`✅ Proposal #${res.data.id} submitted! AI routing: ${(res.data.ai_routing_path || []).join(' → ')}`);
+      setSuccess(`Proposal #${res.data.id} submitted successfully. Routing: ${(res.data.ai_routing_path || []).join(' → ')}`);
       setTimeout(() => navigate(`/proposals/${res.data.id}`), 2000);
     } catch (err) {
       setError(err.response?.data?.detail || 'Submission failed.');
@@ -47,7 +47,7 @@ export default function NewProposal() {
   return (
     <div>
       <div className="page-header">
-        <h1>📝 Submit New Proposal</h1>
+        <h1>Submit New Proposal</h1>
         <p>The AI agent will analyze and route your proposal automatically</p>
       </div>
 
@@ -103,7 +103,7 @@ export default function NewProposal() {
 
             <div className="flex gap-2">
               <button type="submit" className="btn btn-primary" disabled={loading}>
-                {loading ? '⏳ Submitting…' : '🚀 Submit Proposal'}
+                {loading ? 'Submitting…' : 'Submit Proposal'}
               </button>
               <button type="button" className="btn btn-outline" onClick={() => navigate('/proposals')}>Cancel</button>
             </div>
@@ -113,15 +113,14 @@ export default function NewProposal() {
         {/* Info panel */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div className="card">
-            <div className="card-title">🤖 AI Agent Pipeline</div>
+            <div className="card-title">AI Agent Pipeline</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {[
-                { icon: '📝', label: 'Proposal Understanding', desc: 'Extracts intent, risk & budget category' },
-                { icon: '✅', label: 'Compliance Check',       desc: 'Validates against institutional policies' },
-                { icon: '🔀', label: 'Approval Routing',       desc: 'Determines required approvers dynamically' },
+                { label: 'Proposal Understanding', desc: 'Extracts intent, risk & budget category' },
+                { label: 'Compliance Check',        desc: 'Validates against institutional policies' },
+                { label: 'Approval Routing',        desc: 'Determines required approvers dynamically' },
               ].map(item => (
                 <div key={item.label} style={{ display: 'flex', gap: 10 }}>
-                  <span style={{ fontSize: '1.2rem' }}>{item.icon}</span>
                   <div>
                     <div style={{ fontWeight: 600, fontSize: '.85rem' }}>{item.label}</div>
                     <div className="text-muted text-sm">{item.desc}</div>
@@ -132,7 +131,7 @@ export default function NewProposal() {
           </div>
 
           <div className="card">
-            <div className="card-title">💡 Budget Guidelines</div>
+            <div className="card-title">Budget Guidelines</div>
             <div style={{ fontSize: '.82rem', lineHeight: 1.8 }}>
               <div><strong>Guest Lecture:</strong> Up to ₹30,000</div>
               <div><strong>Workshop:</strong> Up to ₹1,00,000</div>

@@ -34,12 +34,12 @@ export default function ProposalsPage() {
     <div>
       <div className="flex-between mb-6">
         <div className="page-header" style={{ margin: 0 }}>
-          <h1>📋 Proposals</h1>
+          <h1>Proposals</h1>
           <p>All institutional event proposals</p>
         </div>
         {(user?.role === 'faculty' || user?.role === 'coordinator') && (
           <button className="btn btn-primary" onClick={() => navigate('/proposals/new')}>
-            ➕ New Proposal
+            New Proposal
           </button>
         )}
       </div>
@@ -61,10 +61,10 @@ export default function ProposalsPage() {
 
       <div className="card">
         {loading ? (
-          <div className="loading">⏳ Loading proposals…</div>
+          <div className="loading">Loading proposals…</div>
         ) : proposals.length === 0 ? (
           <div className="empty-state">
-            <div className="icon">📋</div>
+            <div className="icon"></div>
             <p>No proposals found.</p>
             {(user?.role === 'faculty' || user?.role === 'coordinator') && (
               <button className="btn btn-primary mt-4" onClick={() => navigate('/proposals/new')}>
@@ -99,7 +99,7 @@ export default function ProposalsPage() {
                         <button
                           className="btn btn-sm btn-danger"
                           onClick={e => handleDelete(p.id, e)}
-                        >🗑</button>
+                        >Delete</button>
                       )}
                     </td>
                   </tr>

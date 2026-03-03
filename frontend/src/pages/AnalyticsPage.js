@@ -23,12 +23,12 @@ export default function AnalyticsPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <div className="loading">⏳ Loading analytics…</div>;
+  if (loading) return <div className="loading">Loading analytics…</div>;
 
   return (
     <div>
       <div className="page-header">
-        <h1>📈 Analytics</h1>
+        <h1>Analytics</h1>
         <p>System-wide metrics and insights</p>
       </div>
 

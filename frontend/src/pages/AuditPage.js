@@ -21,7 +21,7 @@ export default function AuditPage() {
   return (
     <div>
       <div className="page-header">
-        <h1>🔍 Audit Log</h1>
+        <h1>Audit Log</h1>
         <p>Complete immutable trail of all system actions</p>
       </div>
 
@@ -36,7 +36,7 @@ export default function AuditPage() {
 
       <div className="card">
         {loading ? (
-          <div className="loading">⏳ Loading audit log…</div>
+          <div className="loading">Loading audit log…</div>
         ) : filtered.length === 0 ? (
           <div className="empty-state">
             <div className="icon">🔍</div>

@@ -22,12 +22,12 @@ export default function DashboardPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <div className="loading">⏳ Loading dashboard…</div>;
+  if (loading) return <div className="loading">Loading dashboard…</div>;
 
   return (
     <div>
       <div className="page-header">
-        <h1>Welcome back, {user?.name?.split(' ')[0]} 👋</h1>
+        <h1>Welcome back, {user?.name?.split(' ')[0]}</h1>
         <p>Agentic AI–Driven Institutional Workflow Automation</p>
       </div>
 
@@ -63,7 +63,7 @@ export default function DashboardPage() {
         {/* Recent Proposals */}
         <div className="card">
           <div className="flex-between mb-4">
-            <div className="card-title" style={{ margin: 0 }}>📋 Recent Proposals</div>
+            <div className="card-title" style={{ margin: 0 }}>Recent Proposals</div>
             <button className="btn btn-outline btn-sm" onClick={() => navigate('/proposals')}>View All</button>
           </div>
           {recent.length === 0 ? (
@@ -90,7 +90,7 @@ export default function DashboardPage() {
         {/* Recent Audit */}
         <div className="card">
           <div className="flex-between mb-4">
-            <div className="card-title" style={{ margin: 0 }}>🔍 Recent Activity</div>
+            <div className="card-title" style={{ margin: 0 }}>Recent Activity</div>
           </div>
           {audits.length === 0 ? (
             <div className="text-muted text-sm">No activity yet.</div>
@@ -113,13 +113,13 @@ export default function DashboardPage() {
       {/* Quick Actions */}
       {user?.role === 'faculty' && (
         <div className="card mt-4">
-          <div className="card-title">⚡ Quick Actions</div>
+          <div className="card-title">Quick Actions</div>
           <div className="flex gap-3">
             <button className="btn btn-primary" onClick={() => navigate('/proposals/new')}>
-              ➕ Submit New Proposal
+              Submit New Proposal
             </button>
             <button className="btn btn-outline" onClick={() => navigate('/proposals')}>
-              📋 View My Proposals
+              View My Proposals
             </button>
           </div>
         </div>
