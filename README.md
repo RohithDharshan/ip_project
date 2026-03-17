@@ -29,21 +29,9 @@
 
     ---
 
-    ## Quick Start (Local Development)
+    ## How to Run
 
-    ### Prerequisites
-    - Python 3.11+
-    - Node.js 18+
-    - Git
-
-    ### Option 1 — Automated Setup
-
-    ```bash
-    chmod +x setup.sh
-    ./setup.sh
-    ```
-
-    ### Option 2 — Manual Setup
+    ### Step 1 — Install dependencies (first time only)
 
     **Backend:**
     ```bash
@@ -51,19 +39,50 @@
     python -m venv venv
     source venv/bin/activate          # Windows: venv\Scripts\activate
     pip install -r requirements.txt
-    cp .env.example .env              # Edit as needed
-    python seed_data.py               # Seed database with demo data
-    uvicorn main:app --reload --port 8000
+    python seed_data.py               # Populate the database with demo data
     ```
 
-    **Frontend** (in a new terminal):
+    **Frontend:**
     ```bash
     cd frontend
     npm install
-    npm start                         # Opens at http://localhost:3000
     ```
 
-    ### Option 3 — Docker Compose
+    ### Step 2 — Start the backend
+
+    ```bash
+    cd backend
+    source venv/bin/activate          # Windows: venv\Scripts\activate
+    uvicorn main:app --reload --port 8000
+    ```
+
+    The API will be available at http://localhost:8000. Interactive docs at http://localhost:8000/docs.
+
+    ### Step 3 — Start the frontend (new terminal)
+
+    ```bash
+    cd frontend
+    npm start
+    ```
+
+    Opens automatically at http://localhost:3000.
+
+    ### Step 4 — Log in
+
+    Use any of the demo accounts (see [Demo Accounts](#demo-accounts) below).
+
+    ---
+
+    ## Quick Start (Automated)
+
+    ### Option 1 — Setup script
+
+    ```bash
+    chmod +x setup.sh
+    ./setup.sh
+    ```
+
+    ### Option 2 — Docker Compose
 
     ```bash
     docker-compose up --build
