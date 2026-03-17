@@ -100,8 +100,9 @@
     | Role | Email | Password |
     |------|-------|----------|
     | Faculty | faculty@psgai.edu.in | Password@123 |
-    | Coordinator | coordinator@psgai.edu.in | Password@123 |
     | HoD | hod@psgai.edu.in | Password@123 |
+    | Dean (Administration) | deanadmin@psgai.edu.in | Password@123 |
+    | Dean (Autonomous) | deanautonomous@psgai.edu.in | Password@123 |
     | Principal | principal@psgai.edu.in | Password@123 |
     | Bursar | bursar@psgai.edu.in | Password@123 |
     | Admin | admin@psgai.edu.in | Password@123 |
@@ -111,16 +112,18 @@
     ## Workflow
 
     ```
-    1. Proposal Submission      → Student submits event/procurement proposal
-    2. AI Analysis              → ProposalAgent extracts intent, budget category, risk
+    1. Proposal Submission      → Faculty submits event/procurement proposal
+    2. AI Analysis              → Risk factors visible only to faculty
     3. Compliance Check         → ComplianceAgent validates against policies
-    4. Routing                  → RoutingAgent determines required approvers
-    5. HoD Approval             → Department head reviews
-    6. Principal Approval       → For budgets > ₹50,000
-    7. Bursar Approval          → Financial authorization
-    8. Procurement Generation   → ProcurementAgent creates purchase orders
-    9. Vendor Recommendation    → VendorAgent scores and ranks vendors
-    10. Audit Logging           → Immutable audit trail for all actions
+    4. Routing                  → Fixed institutional chain is created
+    5. HoD Approval             → Accept / Reject
+    6. Bursar Approval          → Accept / Reject
+    7. Dean (Administration)    → Accept / Reject
+    8. Dean (Autonomous)        → Accept / Reject
+    9. Principal Approval       → Accept / Reject
+    10. Procurement Generation  → ProcurementAgent creates purchase orders
+    11. Vendor Recommendation   → VendorAgent scores and ranks vendors
+    12. Audit Logging           → Immutable audit trail for all actions
     ```
 
     ---
@@ -139,7 +142,7 @@
     | POST | `/proposals` | Submit new proposal |
     | POST | `/proposals/{id}/process` | Trigger AI pipeline |
     | GET | `/approvals/pending` | Pending approvals for current user |
-    | POST | `/approvals/{step_id}/decide` | Approve/Reject/Clarify |
+    | POST | `/approvals/{step_id}/decide` | Approve/Reject |
     | GET | `/vendors/recommend` | AI vendor recommendations |
     | GET | `/analytics/overview` | KPI dashboard data |
     | GET | `/audit` | Full audit log |

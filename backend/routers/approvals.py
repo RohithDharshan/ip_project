@@ -2,7 +2,7 @@
 Approvals Router
 ──────────────────
 GET  /approvals/pending          — steps pending for current user's role
-POST /approvals/{step_id}/decide — approve / reject / request clarification
+POST /approvals/{step_id}/decide — approve / reject
 GET  /approvals/dashboard        — summary stats for approval dashboard
 """
 
@@ -31,7 +31,7 @@ orchestrator = AgentOrchestrator()
 # ── Pydantic Schemas ──────────────────────────────────────────────────────────
 
 class DecisionIn(BaseModel):
-    decision: str        # "approved" | "rejected" | "clarification_requested"
+    decision: str        # "approved" | "rejected"
     comments: Optional[str] = None
 
 

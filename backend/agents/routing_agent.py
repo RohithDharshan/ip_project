@@ -56,7 +56,7 @@ class RoutingAgent:
 
     Input : AI-enriched proposal dict
     Output: ordered list of approver steps
-            [{"step_order":1, "approver_role":"coordinator", "approver_name":..., "approver_email":...}, ...]
+            [{"step_order":1, "approver_role":"hod", "approver_name":..., "approver_email":...}, ...]
     """
 
     def compute_routing(self, proposal_data: Dict[str, Any]) -> List[Dict[str, Any]]:
