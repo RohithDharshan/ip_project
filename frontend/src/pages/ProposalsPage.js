@@ -37,7 +37,7 @@ export default function ProposalsPage() {
           <h1>Proposals</h1>
           <p>All institutional event proposals</p>
         </div>
-        {(user?.role === 'faculty' || user?.role === 'coordinator') && (
+        {user?.role === 'faculty' && (
           <button className="btn btn-primary" onClick={() => navigate('/proposals/new')}>
             New Proposal
           </button>
@@ -66,7 +66,7 @@ export default function ProposalsPage() {
           <div className="empty-state">
             <div className="icon"></div>
             <p>No proposals found.</p>
-            {(user?.role === 'faculty' || user?.role === 'coordinator') && (
+            {user?.role === 'faculty' && (
               <button className="btn btn-primary mt-4" onClick={() => navigate('/proposals/new')}>
                 Submit Your First Proposal
               </button>
@@ -78,7 +78,8 @@ export default function ProposalsPage() {
               <thead>
                 <tr>
                   <th>#</th><th>Title</th><th>Type</th><th>Budget</th>
-                  <th>Risk</th><th>Status</th><th>Date</th><th></th>
+                  {user?.role === 'faculty' && <th>Risk</th>}
+                  <th>Status</th><th>Date</th><th></th>
                 </tr>
               </thead>
               <tbody>
@@ -91,7 +92,7 @@ export default function ProposalsPage() {
                     </td>
                     <td><span className="chip">{eventLabel(p.event_type)}</span></td>
                     <td>{formatCurrency(p.budget)}</td>
-                    <td>{riskChip(p.ai_risk_level)}</td>
+                    {user?.role === 'faculty' && <td>{riskChip(p.ai_risk_level)}</td>}
                     <td>{statusBadge(p.status)}</td>
                     <td className="text-muted text-sm">{p.expected_date || formatDate(p.created_at)}</td>
                     <td>

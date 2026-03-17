@@ -155,6 +155,8 @@ async def pending_approvals(
     )
     rows = result.all()
 
+    can_view_risk = role == "faculty"
+
     return [
         {
             "id":              step.id,
@@ -166,7 +168,7 @@ async def pending_approvals(
             "proposal_title":  proposal.title,
             "proposal_budget": proposal.budget,
             "proposal_event_type": proposal.event_type.value if hasattr(proposal.event_type,"value") else str(proposal.event_type),
-            "ai_risk_level":   proposal.ai_risk_level,
+            "ai_risk_level":   proposal.ai_risk_level if can_view_risk else None,
             "submitted_by":    submitter.name,
             "created_at":      step.created_at.isoformat(),
         }
@@ -203,6 +205,19 @@ async def decide(
     new_status = decision_map.get(data.decision)
     if not new_status:
         raise HTTPException(status_code=400, detail=f"Invalid decision: {data.decision}")
+
+    strict_roles = {
+        "hod",
+        "bursar",
+        "dean_administration",
+        "dean_autonomous",
+        "principal",
+    }
+    if step.approver_role in strict_roles and data.decision not in {"approved", "rejected"}:
+        raise HTTPException(
+            status_code=400,
+            detail="Only 'approved' or 'rejected' decisions are allowed for this role.",
+        )
 
     step.status     = new_status
     step.comments   = data.comments

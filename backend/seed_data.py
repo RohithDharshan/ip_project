@@ -32,11 +32,11 @@ DEFAULT_PW  = pwd_context.hash("Password@123")
 DEFAULT_USERS = [
     {"name": "Dr. Priya Nair",         "email": "faculty@psgai.edu.in",      "role": UserRole.FACULTY,       "department": "Computer Science"},
     {"name": "Dr. Anand Kumar",        "email": "faculty2@psgai.edu.in",     "role": UserRole.FACULTY,       "department": "AI & Data Science"},
-    {"name": "Dr. S. Lakshmi",         "email": "coordinator@psgai.edu.in",  "role": UserRole.COORDINATOR,   "department": "Administration"},
     {"name": "Dr. R. Venkatesh",       "email": "hod@psgai.edu.in",          "role": UserRole.HOD,            "department": "Computer Science"},
-    {"name": "Dr. P. Krishnamurthy",   "email": "pm@psgai.edu.in",           "role": UserRole.PROGRAMME_MGR, "department": "Academic Affairs"},
-    {"name": "Dr. A. Ramasamy",        "email": "principal@psgai.edu.in",    "role": UserRole.PRINCIPAL,     "department": "Management"},
     {"name": "Mr. K. Sundaram",        "email": "bursar@psgai.edu.in",       "role": UserRole.BURSAR,        "department": "Finance"},
+    {"name": "Dr. M. Janaki",          "email": "deanadmin@psgai.edu.in",    "role": UserRole.DEAN_ADMIN,    "department": "Administration"},
+    {"name": "Dr. V. Balachander",     "email": "deanautonomous@psgai.edu.in","role": UserRole.DEAN_AUTONOMOUS, "department": "Academic Council"},
+    {"name": "Dr. A. Ramasamy",        "email": "principal@psgai.edu.in",    "role": UserRole.PRINCIPAL,     "department": "Management"},
     {"name": "Ms. Geetha Subramanian", "email": "admin@psgai.edu.in",        "role": UserRole.ADMIN,         "department": "IT"},
 ]
 
@@ -165,68 +165,61 @@ PROPOSALS_DATA = [
 # ─── Approver directory (mirrors routing_agent.py) ────────────────────────────
 
 APPROVER_EMAILS = {
-    "coordinator":       "coordinator@psgai.edu.in",
     "hod":               "hod@psgai.edu.in",
-    "programme_manager": "pm@psgai.edu.in",
-    "principal":         "principal@psgai.edu.in",
     "bursar":            "bursar@psgai.edu.in",
+    "dean_administration": "deanadmin@psgai.edu.in",
+    "dean_autonomous":   "deanautonomous@psgai.edu.in",
+    "principal":         "principal@psgai.edu.in",
 }
 APPROVER_NAMES = {
-    "coordinator":       "Dr. S. Lakshmi",
     "hod":               "Dr. R. Venkatesh",
-    "programme_manager": "Dr. P. Krishnamurthy",
-    "principal":         "Dr. A. Ramasamy",
     "bursar":            "Mr. K. Sundaram",
+    "dean_administration": "Dr. M. Janaki",
+    "dean_autonomous":   "Dr. V. Balachander",
+    "principal":         "Dr. A. Ramasamy",
 }
 
-BUDGET_ROUTING = {
-    "small":  ["coordinator"],
-    "medium": ["coordinator", "hod", "programme_manager"],
-    "large":  ["coordinator", "hod", "programme_manager", "principal", "bursar"],
-}
-HIERARCHY = ["coordinator", "hod", "programme_manager", "principal", "bursar"]
+HIERARCHY = ["hod", "bursar", "dean_administration", "dean_autonomous", "principal"]
 
 
 def _compute_steps(budget_cat, risk_level, event_type_str, attendees):
-    required = set(BUDGET_ROUTING.get(budget_cat, ["coordinator"]))
-    if risk_level == "high":
-        required.update(["principal", "bursar"])
-    elif risk_level == "medium":
-        required.add("programme_manager")
-    if event_type_str in ("conference", "cultural_fest", "technical_fest"):
-        required.add("principal")
-    if attendees > 200:
-        required.add("principal")
-    return [r for r in HIERARCHY if r in required]
+    return list(HIERARCHY)
 
 
 # ─── Main seed function ───────────────────────────────────────────────────────
 
 async def seed_all():
     async with AsyncSessionLocal() as db:
-        # Check if already seeded
-        count = (await db.execute(select(func.count()).select_from(User))).scalar() or 0
-        if count > 0:
-            logger.info("[Seed] Database already seeded — skipping.")
-            return
-
-        logger.info("[Seed] Seeding database with default data...")
+        # Always ensure required users exist, even in pre-seeded databases.
+        logger.info("[Seed] Ensuring required default users exist...")
 
         # ── Users ──────────────────────────────────────────────────────────
         user_map       = {}   # role -> user (last wins for duplicates)
         user_email_map = {}   # email -> user (always unique)
         for u in DEFAULT_USERS:
-            user = User(
-                name            = u["name"],
-                email           = u["email"],
-                hashed_password = DEFAULT_PW,
-                role            = u["role"],
-                department      = u["department"],
-            )
-            db.add(user)
-            await db.flush()
+            existing_user_result = await db.execute(select(User).where(User.email == u["email"]))
+            user = existing_user_result.scalar_one_or_none()
+            if not user:
+                user = User(
+                    name            = u["name"],
+                    email           = u["email"],
+                    hashed_password = DEFAULT_PW,
+                    role            = u["role"],
+                    department      = u["department"],
+                )
+                db.add(user)
+                await db.flush()
             user_map[u["role"].value]  = user
             user_email_map[u["email"]] = user
+
+        # Check if already seeded for vendors/proposals
+        count = (await db.execute(select(func.count()).select_from(Vendor))).scalar() or 0
+        if count > 0:
+            await db.commit()
+            logger.info("[Seed] Core data already present — users ensured, skipping vendors/proposals.")
+            return
+
+        logger.info("[Seed] Seeding database with default data...")
 
         # ── Vendors ────────────────────────────────────────────────────────
         for name, category, rating, reliability, price_idx, past_orders in VENDOR_DATA:

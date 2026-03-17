@@ -9,8 +9,8 @@ based on:
   • number of attendees
 
 Routing hierarchy (PSG AI Consortium rules):
-  FACULTY (submitter) → COORDINATOR → HOD → PROGRAMME_MANAGER
-  → PRINCIPAL (if needed) → BURSAR (if budget > 50k)
+    FACULTY (submitter) → HOD → BURSAR → DEAN (Administration)
+    → DEAN (Autonomous) → PRINCIPAL
 
 This is the core innovation of the system.
 """
@@ -20,46 +20,33 @@ from typing import List, Dict, Any
 
 # ─── Hierarchy definition ─────────────────────────────────────────────────────
 HIERARCHY_ORDER = [
-    "coordinator",
     "hod",
-    "programme_manager",
-    "principal",
     "bursar",
+    "dean_administration",
+    "dean_autonomous",
+    "principal",
 ]
 
 # ─── Routing rules ────────────────────────────────────────────────────────────
 # Each rule is evaluated; the one with the highest matching score wins.
 # Rules define the minimum role required.
 
-BUDGET_ROUTING = {
-    "small":  ["coordinator"],               # <= 50k
-    "medium": ["coordinator", "hod", "programme_manager"],
-    "large":  ["coordinator", "hod", "programme_manager", "principal", "bursar"],
-}
-
-EVENT_TYPE_EXTRAS = {
-    "conference":    ["principal"],
-    "cultural_fest": ["principal"],
-    "technical_fest":["principal"],
-    "sports_event":  ["programme_manager"],
-}
-
-RISK_EXTRAS = {
-    "high":  ["principal", "bursar"],
-    "medium": ["programme_manager"],
-    "low":   [],
-}
-
-ATTENDEE_THRESHOLD = 200  # above this → add principal if not already present
+FIXED_APPROVAL_CHAIN = [
+    "hod",
+    "bursar",
+    "dean_administration",
+    "dean_autonomous",
+    "principal",
+]
 
 
 # ─── Approver directory (mock — in production pulled from DB / LDAP) ──────────
 APPROVER_DIRECTORY: Dict[str, Dict[str, str]] = {
-    "coordinator":      {"name": "Dr. S. Lakshmi",      "email": "coordinator@psgai.edu.in"},
     "hod":              {"name": "Dr. R. Venkatesh",     "email": "hod@psgai.edu.in"},
-    "programme_manager":{"name": "Dr. P. Krishnamurthy", "email": "pm@psgai.edu.in"},
-    "principal":        {"name": "Dr. A. Ramasamy",      "email": "principal@psgai.edu.in"},
     "bursar":           {"name": "Mr. K. Sundaram",      "email": "bursar@psgai.edu.in"},
+    "dean_administration": {"name": "Dr. M. Janaki",     "email": "deanadmin@psgai.edu.in"},
+    "dean_autonomous":  {"name": "Dr. V. Balachander",   "email": "deanautonomous@psgai.edu.in"},
+    "principal":        {"name": "Dr. A. Ramasamy",      "email": "principal@psgai.edu.in"},
 }
 
 
@@ -77,28 +64,8 @@ class RoutingAgent:
         Main entry point.
         Returns an ordered list of approval steps.
         """
-        budget_cat  = proposal_data.get("ai_budget_cat", "small")
-        risk_level  = proposal_data.get("ai_risk_level", "low")
-        event_type  = (proposal_data.get("event_type") or "").lower()
-        attendees   = int(proposal_data.get("expected_attendees") or 0)
-
-        # Start with base set from budget
-        required_roles = set(BUDGET_ROUTING.get(budget_cat, ["coordinator"]))
-
-        # Add event-type extras
-        for role in EVENT_TYPE_EXTRAS.get(event_type, []):
-            required_roles.add(role)
-
-        # Add risk extras
-        for role in RISK_EXTRAS.get(risk_level, []):
-            required_roles.add(role)
-
-        # Attendee rule
-        if attendees > ATTENDEE_THRESHOLD:
-            required_roles.add("principal")
-
-        # Sort by hierarchy order
-        ordered = [r for r in HIERARCHY_ORDER if r in required_roles]
+        # Fixed institutional policy chain for all proposal types.
+        ordered = [r for r in HIERARCHY_ORDER if r in FIXED_APPROVAL_CHAIN]
 
         # Build step objects
         steps = []

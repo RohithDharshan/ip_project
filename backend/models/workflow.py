@@ -17,6 +17,8 @@ class UserRole(str, enum.Enum):
     COORDINATOR   = "coordinator"
     HOD           = "hod"
     PROGRAMME_MGR = "programme_manager"
+    DEAN_ADMIN    = "dean_administration"
+    DEAN_AUTONOMOUS = "dean_autonomous"
     PRINCIPAL     = "principal"
     BURSAR        = "bursar"
     ADMIN         = "admin"

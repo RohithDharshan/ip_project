@@ -75,7 +75,7 @@ function ProtectedRoute({ children }) {
 const NAV_ITEMS = [
   { path: '/',          label: 'Dashboard',  roles: null },
   { path: '/proposals', label: 'Proposals',  roles: null },
-  { path: '/approvals', label: 'Approvals',  roles: ['coordinator','hod','programme_manager','principal','bursar','admin'] },
+  { path: '/approvals', label: 'Approvals',  roles: ['hod','bursar','dean_administration','dean_autonomous','principal','admin'] },
   { path: '/vendors',   label: 'Vendors',    roles: null },
   { path: '/analytics', label: 'Analytics',  roles: null },
   { path: '/audit',     label: 'Audit Log',  roles: ['admin','principal','bursar'] },

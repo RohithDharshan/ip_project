@@ -2,10 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getProposal, getWorkflow, getProposalAudit, getProposalAnalysis } from '../api';
 import { statusBadge, riskBadge, formatCurrency, formatDate, eventLabel } from '../utils';
+import { useAuth } from '../App';
 
 export default function ProposalDetail() {
   const { id }                  = useParams();
   const navigate                = useNavigate();
+  const { user }                = useAuth();
   const [proposal,     setProposal]     = useState(null);
   const [steps,        setSteps]        = useState([]);
   const [auditLogs,    setAuditLogs]    = useState([]);
@@ -13,6 +15,7 @@ export default function ProposalDetail() {
   const [analysisLoading, setAnalysisLoading] = useState(false);
   const [loading,      setLoading]      = useState(true);
   const [activeTab,    setActiveTab]    = useState('overview');
+  const canViewRisk = user?.role === 'faculty';
 
   useEffect(() => {
     Promise.all([getProposal(id), getWorkflow(id), getProposalAudit(id)])
@@ -41,7 +44,7 @@ export default function ProposalDetail() {
   const TABS = [
     { id: 'overview',   label: 'Overview' },
     { id: 'workflow',   label: 'Workflow' },
-    { id: 'ai',         label: 'AI Analysis' },
+    ...(canViewRisk ? [{ id: 'ai', label: 'AI Analysis' }] : []),
     { id: 'audit',      label: 'Audit Trail' },
   ];
 
@@ -63,7 +66,7 @@ export default function ProposalDetail() {
           <div><div className="text-muted text-sm">Attendees</div><div style={{ fontWeight: 600 }}>{proposal.expected_attendees}</div></div>
           <div><div className="text-muted text-sm">Date</div><div style={{ fontWeight: 600 }}>{proposal.expected_date || '—'}</div></div>
           <div><div className="text-muted text-sm">Venue</div><div>{proposal.venue || '—'}</div></div>
-          <div><div className="text-muted text-sm">Risk Level</div>{riskBadge(proposal.ai_risk_level)}</div>
+          {canViewRisk && <div><div className="text-muted text-sm">Risk Level</div>{riskBadge(proposal.ai_risk_level)}</div>}
         </div>
       </div>
 

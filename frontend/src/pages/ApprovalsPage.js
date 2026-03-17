@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getPending, decide, getDashboard } from '../api';
-import { formatCurrency, riskBadge } from '../utils';
+import { formatCurrency } from '../utils';
 
 export default function ApprovalsPage() {
   const navigate               = useNavigate();
@@ -75,7 +75,7 @@ export default function ApprovalsPage() {
               <thead>
                 <tr>
                   <th>Proposal</th><th>Type</th><th>Budget</th>
-                  <th>Risk</th><th>Submitted By</th><th>Step</th><th></th>
+                  <th>Submitted By</th><th>Step</th><th></th>
                 </tr>
               </thead>
               <tbody>
@@ -89,7 +89,6 @@ export default function ApprovalsPage() {
                     </td>
                     <td><span className="chip">{s.proposal_event_type?.replace(/_/g,' ')}</span></td>
                     <td style={{ fontWeight: 500 }}>{formatCurrency(s.proposal_budget)}</td>
-                    <td>{riskBadge(s.ai_risk_level)}</td>
                     <td>{s.submitted_by}</td>
                     <td>
                       <span className="chip">{s.approver_role.replace(/_/g,' ')}</span>
@@ -116,7 +115,6 @@ export default function ApprovalsPage() {
             <div style={{ background: '#f8fafc', borderRadius: 8, padding: 14, marginBottom: 16, fontSize: '.875rem' }}>
               <div><strong>Budget:</strong> {formatCurrency(modal.proposal_budget)}</div>
               <div><strong>Type:</strong> {modal.proposal_event_type?.replace(/_/g,' ')}</div>
-              <div><strong>Risk:</strong> {modal.ai_risk_level}</div>
               <div><strong>Submitted by:</strong> {modal.submitted_by}</div>
             </div>
 
@@ -126,7 +124,6 @@ export default function ApprovalsPage() {
                 {[
                   { v: 'approved',                label: 'Approve',   cls: 'btn-success' },
                   { v: 'rejected',                label: 'Reject',    cls: 'btn-danger'  },
-                  { v: 'clarification_requested', label: 'Clarify',   cls: 'btn-warning' },
                 ].map(d => (
                   <button
                     key={d.v}
@@ -156,7 +153,7 @@ export default function ApprovalsPage() {
             <div className="modal-actions">
               <button className="btn btn-outline" onClick={closeModal}>Cancel</button>
               <button
-                className={`btn ${decision === 'approved' ? 'btn-success' : decision === 'rejected' ? 'btn-danger' : 'btn-warning'}`}
+                className={`btn ${decision === 'approved' ? 'btn-success' : 'btn-danger'}`}
                 onClick={handleDecide}
                 disabled={submitting}
               >

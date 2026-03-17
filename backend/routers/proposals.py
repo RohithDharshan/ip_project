@@ -83,6 +83,28 @@ async def _get_all_proposals_dicts(db: AsyncSession) -> List[dict]:
     ]
 
 
+def _serialize_proposal(proposal: Proposal, can_view_risk: bool) -> dict:
+    return {
+        "id": proposal.id,
+        "title": proposal.title,
+        "description": proposal.description,
+        "event_type": proposal.event_type.value if hasattr(proposal.event_type, "value") else str(proposal.event_type),
+        "budget": proposal.budget,
+        "requirements": proposal.requirements,
+        "venue": proposal.venue,
+        "expected_date": proposal.expected_date,
+        "expected_attendees": proposal.expected_attendees,
+        "status": proposal.status.value if hasattr(proposal.status, "value") else str(proposal.status),
+        "submitted_by": proposal.submitted_by,
+        "ai_intent": proposal.ai_intent,
+        "ai_risk_level": proposal.ai_risk_level if can_view_risk else None,
+        "ai_budget_cat": proposal.ai_budget_cat,
+        "ai_routing_path": proposal.ai_routing_path,
+        "created_at": proposal.created_at,
+        "updated_at": proposal.updated_at,
+    }
+
+
 # ── Endpoints ─────────────────────────────────────────────────────────────────
 
 @router.get("", response_model=List[ProposalOut])
@@ -101,11 +123,13 @@ async def list_proposals(
         q = q.where(Proposal.event_type == event_type)
 
     # Faculty see only their own proposals; all other roles see all proposals
-    if current_user.role.value in ("faculty", "coordinator"):
+    if current_user.role.value == "faculty":
         q = q.where(Proposal.submitted_by == current_user.id)
 
     result = await db.execute(q)
-    return result.scalars().all()
+    proposals = result.scalars().all()
+    can_view_risk = current_user.role.value == "faculty"
+    return [_serialize_proposal(p, can_view_risk) for p in proposals]
 
 
 @router.post("", response_model=ProposalOut, status_code=201)
@@ -114,6 +138,9 @@ async def create_proposal(
     db:           AsyncSession = Depends(get_db),
     current_user: User         = Depends(get_current_user),
 ):
+    if current_user.role.value != "faculty":
+        raise HTTPException(status_code=403, detail="Only faculty can submit proposals.")
+
     # Gather existing proposals for compliance check
     existing = await _get_all_proposals_dicts(db)
 
@@ -203,7 +230,8 @@ async def get_proposal(
     proposal = result.scalar_one_or_none()
     if not proposal:
         raise HTTPException(status_code=404, detail="Proposal not found.")
-    return proposal
+    can_view_risk = current_user.role.value == "faculty"
+    return _serialize_proposal(proposal, can_view_risk)
 
 
 @router.get("/{proposal_id}/workflow", response_model=List[dict])
@@ -265,6 +293,9 @@ async def get_analysis(
       - routing explanation
       - budget analysis
     """
+    if current_user.role.value != "faculty":
+        raise HTTPException(status_code=403, detail="Only faculty can view risk analysis.")
+
     result = await db.execute(select(Proposal).where(Proposal.id == proposal_id))
     proposal = result.scalar_one_or_none()
     if not proposal:
