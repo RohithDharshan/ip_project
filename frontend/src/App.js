@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, NavLink, useNavigate } from 'react-router-dom';
-import { getMe } from './api'; // used for session re-validation on load
+import { getMe, getPending } from './api'; // used for session re-validation on load
 
 // ── Pages ──────────────────────────────────────────────────────────────────
 import LoginPage      from './pages/LoginPage';
@@ -53,6 +53,7 @@ function AuthProvider({ children }) {
   const setLoggedIn = (userData, token) => {
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(userData));
+    sessionStorage.setItem('show_login_notification', '1');
     setUser(userData);
   };
 
@@ -131,12 +132,79 @@ function Sidebar() {
   );
 }
 
+function LoginNotificationPopup() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+  const [pending, setPending] = useState([]);
+
+  useEffect(() => {
+    const shouldShow = sessionStorage.getItem('show_login_notification') === '1';
+    const approverRoles = ['hod', 'bursar', 'dean_administration', 'dean_autonomous', 'principal'];
+
+    if (!shouldShow || !approverRoles.includes(user?.role)) return;
+
+    getPending()
+      .then(res => {
+        const items = Array.isArray(res.data) ? res.data : [];
+        if (items.length > 0) {
+          setPending(items);
+          setOpen(true);
+        }
+      })
+      .catch(() => {
+        // Silent fail: login flow should not break if notification fetch fails.
+      })
+      .finally(() => {
+        sessionStorage.removeItem('show_login_notification');
+      });
+  }, [user]);
+
+  if (!open) return null;
+
+  const preview = pending.slice(0, 3);
+
+  return (
+    <div className="modal-overlay" onClick={() => setOpen(false)}>
+      <div className="modal" onClick={e => e.stopPropagation()}>
+        <h2>Pending Approvals</h2>
+        <div className="alert alert-info" style={{ marginBottom: 12 }}>
+          You have <strong>{pending.length}</strong> pending approval{pending.length > 1 ? 's' : ''}.
+        </div>
+
+        <div style={{ marginBottom: 16 }}>
+          {preview.map(item => (
+            <div key={item.id} style={{ padding: '8px 0', borderBottom: '1px solid #e2e8f0' }}>
+              <div style={{ fontWeight: 600 }}>{item.proposal_title}</div>
+              <div className="text-sm text-muted">Step {item.step_order} • {item.approver_role.replace(/_/g, ' ')}</div>
+            </div>
+          ))}
+        </div>
+
+        <div className="modal-actions">
+          <button className="btn btn-outline" onClick={() => setOpen(false)}>Dismiss</button>
+          <button
+            className="btn btn-primary"
+            onClick={() => {
+              setOpen(false);
+              navigate('/approvals');
+            }}
+          >
+            Open Approvals
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Layout ─────────────────────────────────────────────────────────────────
 function AppLayout({ children }) {
   return (
     <div className="app-shell">
       <Sidebar />
       <main className="main-content">{children}</main>
+      <LoginNotificationPopup />
     </div>
   );
 }
