@@ -140,7 +140,7 @@
     | GET | `/auth/me` | Current user info |
     | GET | `/proposals` | List all proposals |
     | POST | `/proposals` | Submit new proposal |
-    | POST | `/proposals/{id}/process` | Trigger AI pipeline |
+    | GET | `/proposals/{id}/analysis` | View AI risk & compliance analysis (faculty only) |
     | GET | `/approvals/pending` | Pending approvals for current user |
     | POST | `/approvals/{step_id}/decide` | Approve/Reject |
     | GET | `/vendors/recommend` | AI vendor recommendations |

@@ -198,9 +198,8 @@ async def decide(
 
     # Map decision
     decision_map = {
-        "approved":                  ApprovalStatus.APPROVED,
-        "rejected":                  ApprovalStatus.REJECTED,
-        "clarification_requested":   ApprovalStatus.CLARIFY,
+        "approved": ApprovalStatus.APPROVED,
+        "rejected": ApprovalStatus.REJECTED,
     }
     new_status = decision_map.get(data.decision)
     if not new_status:
@@ -237,9 +236,6 @@ async def decide(
             EmailService.send_status_update(
                 submitter.email, submitter.name, proposal.title, "rejected"
             )
-    elif data.decision == "clarification_requested":
-        proposal.status     = ProposalStatus.REVISION
-        proposal.updated_at = datetime.utcnow()
     elif data.decision == "approved":
         await _try_advance_workflow(db, proposal, step, current_user)
 

@@ -4,10 +4,16 @@ import urllib.request, urllib.parse, json, sys
 
 BASE = "http://localhost:8000"
 
-def req(method, path, token=None, form=None):
+def req(method, path, token=None, form=None, json_body=None):
     url = BASE + path
-    data = urllib.parse.urlencode(form).encode() if form else None
-    headers = {"Content-Type": "application/x-www-form-urlencoded"} if form else {}
+    data = None
+    headers = {}
+    if form is not None:
+        data = urllib.parse.urlencode(form).encode()
+        headers["Content-Type"] = "application/x-www-form-urlencoded"
+    elif json_body is not None:
+        data = json.dumps(json_body).encode()
+        headers["Content-Type"] = "application/json"
     if token:
         headers["Authorization"] = f"Bearer {token}"
     r = urllib.request.Request(url, data=data, headers=headers, method=method)
@@ -24,7 +30,8 @@ FAIL = "\033[91m✗\033[0m"
 
 def check(label, cond, detail=""):
     mark = PASS if cond else FAIL
-    print(f"  {mark}  {label}{('  →  ' + detail) if detail else ''}")
+    detail_text = str(detail) if detail is not None else ""
+    print(f"  {mark}  {label}{('  →  ' + detail_text) if detail_text else ''}")
     return cond
 
 all_ok = True
@@ -39,12 +46,16 @@ r2 = req("POST", "/auth/login", form={"username": "hod@psgai.edu.in", "password"
 tok_hod = r2.get("access_token")
 all_ok &= check("hod login", bool(tok_hod))
 
-r3 = req("POST", "/auth/login", form={"username": "coordinator@psgai.edu.in", "password": "Password@123"})
-tok_coord = r3.get("access_token")
-all_ok &= check("coordinator login", bool(tok_coord))
+r3 = req("POST", "/auth/login", form={"username": "deanadmin@psgai.edu.in", "password": "Password@123"})
+tok_dean_admin = r3.get("access_token")
+all_ok &= check("dean administration login", bool(tok_dean_admin))
 
-r4 = req("POST", "/auth/login", form={"username": "admin@psgai.edu.in", "password": "Password@123"})
-tok_admin = r4.get("access_token")
+r4 = req("POST", "/auth/login", form={"username": "deanautonomous@psgai.edu.in", "password": "Password@123"})
+tok_dean_auto = r4.get("access_token")
+all_ok &= check("dean autonomous login", bool(tok_dean_auto))
+
+r5 = req("POST", "/auth/login", form={"username": "admin@psgai.edu.in", "password": "Password@123"})
+tok_admin = r5.get("access_token")
 all_ok &= check("admin login", bool(tok_admin))
 
 # ── /auth/me ────────────────────────────────────────────────────────────────
@@ -64,8 +75,17 @@ props_hod = req("GET", "/proposals", token=tok_hod)
 all_ok &= check("hod sees all proposals", isinstance(props_hod, list) and len(props_hod) > len(props_fac),
                 f"hod={len(props_hod)}, faculty={len(props_fac)}")
 
-props_coord = req("GET", "/proposals", token=tok_coord)
-all_ok &= check("coordinator sees proposals", isinstance(props_coord, list), f"{len(props_coord)}")
+if isinstance(props_fac, list) and props_fac:
+    all_ok &= check("faculty can see risk in proposals", props_fac[0].get("ai_risk_level") is not None)
+if isinstance(props_hod, list) and props_hod:
+    all_ok &= check("non-faculty risk hidden in proposals", props_hod[0].get("ai_risk_level") is None)
+
+if isinstance(props_fac, list) and props_fac:
+    pid_for_analysis = props_fac[0].get("id")
+    fac_analysis = req("GET", f"/proposals/{pid_for_analysis}/analysis", token=tok_fac)
+    hod_analysis = req("GET", f"/proposals/{pid_for_analysis}/analysis", token=tok_hod)
+    all_ok &= check("faculty can access analysis", isinstance(fac_analysis, dict) and "risk" in fac_analysis)
+    all_ok &= check("non-faculty analysis blocked", hod_analysis.get("_error") == 403, str(hod_analysis))
 
 # ── Vendors ─────────────────────────────────────────────────────────────────
 print("\n[Vendors]")
@@ -89,6 +109,23 @@ all_ok &= check("audit log", isinstance(audit, list), f"{len(audit)} entries")
 print("\n[Approvals]")
 pending = req("GET", "/approvals/pending", token=tok_hod)
 all_ok &= check("hod pending approvals", isinstance(pending, list), f"{len(pending)} items")
+
+if isinstance(props_hod, list) and props_hod:
+    pid = props_hod[0].get("id")
+    wf = req("GET", f"/proposals/{pid}/workflow", token=tok_hod)
+    expected = ["hod", "bursar", "dean_administration", "dean_autonomous", "principal"]
+    actual = [s.get("approver_role") for s in wf] if isinstance(wf, list) else []
+    all_ok &= check("workflow chain order", actual == expected, f"{actual}")
+
+if isinstance(pending, list) and pending:
+    step_id = pending[0].get("id")
+    bad_decision = req(
+        "POST",
+        f"/approvals/{step_id}/decide",
+        token=tok_hod,
+            json_body={"decision": "clarification_requested", "comments": "not allowed"},
+    )
+    all_ok &= check("clarify decision blocked", bad_decision.get("_error") == 400, str(bad_decision))
 
 dash = req("GET", "/approvals/dashboard", token=tok_hod)
 all_ok &= check("approvals dashboard", isinstance(dash, dict) and "total" in dash,
