@@ -46,6 +46,76 @@ body {
 .user-badge     { display: flex; align-items: center; gap: 8px; padding: 8px 20px; margin-bottom: 4px; }
 .user-avatar    { width: 32px; height: 32px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: .85rem; }
 
+.sidebar-notifications { padding: 0 16px 12px; position: relative; }
+.notif-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(255,255,255,.25);
+  background: rgba(255,255,255,.08);
+  color: #fff;
+  border-radius: 8px;
+  padding: 8px 10px;
+  cursor: pointer;
+  font-size: .82rem;
+}
+.notif-trigger:hover { background: rgba(255,255,255,.16); }
+.notif-count {
+  margin-left: auto;
+  min-width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  background: #f59e0b;
+  color: #111827;
+  font-size: .72rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6px;
+}
+.notif-panel {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  top: 44px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 12px 28px rgba(0,0,0,.25);
+  z-index: 150;
+  overflow: hidden;
+}
+.notif-empty {
+  color: #6b7280;
+  font-size: .8rem;
+  padding: 12px;
+}
+.notif-item {
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: #fff;
+  border-bottom: 1px solid #f1f5f9;
+  padding: 10px 12px;
+  cursor: pointer;
+}
+.notif-item:hover { background: #f8fafc; }
+.notif-title { color: #111827; font-size: .8rem; font-weight: 600; }
+.notif-meta { color: #6b7280; font-size: .72rem; margin-top: 2px; }
+.notif-view-all {
+  width: 100%;
+  border: 0;
+  background: #eef2ff;
+  color: #1a237e;
+  padding: 9px 12px;
+  font-size: .78rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.notif-view-all:hover { background: #e0e7ff; }
+
 /* ── Cards ───────────────────────────────────────────────────────────────── */
 .card           { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px; }
 .card-title     { font-size: 1rem; font-weight: 600; margin-bottom: 16px; color: var(--primary); }

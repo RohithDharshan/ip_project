@@ -13,6 +13,8 @@ import VendorsPage    from './pages/VendorsPage';
 import AnalyticsPage  from './pages/AnalyticsPage';
 import AuditPage      from './pages/AuditPage';
 
+const APPROVER_ROLES = ['hod', 'bursar', 'dean_administration', 'dean_autonomous', 'principal'];
+
 // ── Auth Context ───────────────────────────────────────────────────────────
 export const AuthContext = createContext(null);
 export const useAuth = () => useContext(AuthContext);
@@ -85,11 +87,46 @@ const NAV_ITEMS = [
 function Sidebar() {
   const { user, logout } = useAuth();
   const navigate         = useNavigate();
+  const [pending, setPending] = useState([]);
+  const [notifOpen, setNotifOpen] = useState(false);
 
   const handleLogout = () => { logout(); navigate('/login'); };
   const visibleItems = NAV_ITEMS.filter(
     item => !item.roles || item.roles.includes(user?.role)
   );
+
+  useEffect(() => {
+    if (!APPROVER_ROLES.includes(user?.role)) {
+      setPending([]);
+      setNotifOpen(false);
+      return;
+    }
+
+    let mounted = true;
+
+    const loadPending = () => {
+      getPending()
+        .then(res => {
+          if (!mounted) return;
+          const items = Array.isArray(res.data) ? res.data : [];
+          setPending(items);
+        })
+        .catch(() => {
+          if (!mounted) return;
+          setPending([]);
+        });
+    };
+
+    loadPending();
+    const timer = setInterval(loadPending, 60000);
+
+    return () => {
+      mounted = false;
+      clearInterval(timer);
+    };
+  }, [user?.role]);
+
+  const preview = pending.slice(0, 3);
 
   return (
     <aside className="sidebar">
@@ -105,6 +142,55 @@ function Sidebar() {
           <div style={{ fontSize: '.7rem', opacity: .7, textTransform: 'capitalize' }}>{user?.role?.replace('_',' ')}</div>
         </div>
       </div>
+
+      {APPROVER_ROLES.includes(user?.role) && (
+        <div className="sidebar-notifications">
+          <button
+            className="notif-trigger"
+            onClick={() => setNotifOpen(v => !v)}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M12 3a6 6 0 0 0-6 6v3.4c0 .9-.3 1.8-.9 2.5L3.6 17h16.8l-1.5-2.1a4.4 4.4 0 0 1-.9-2.5V9a6 6 0 0 0-6-6Z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M9.5 19a2.5 2.5 0 0 0 5 0" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+            </svg>
+            <span>Notifications</span>
+            {pending.length > 0 && <span className="notif-count">{pending.length}</span>}
+          </button>
+
+          {notifOpen && (
+            <div className="notif-panel">
+              {pending.length === 0 ? (
+                <div className="notif-empty">No pending approvals.</div>
+              ) : (
+                <>
+                  {preview.map(item => (
+                    <button
+                      key={item.id}
+                      className="notif-item"
+                      onClick={() => {
+                        setNotifOpen(false);
+                        navigate('/approvals');
+                      }}
+                    >
+                      <div className="notif-title">{item.proposal_title}</div>
+                      <div className="notif-meta">Step {item.step_order}</div>
+                    </button>
+                  ))}
+                  <button
+                    className="notif-view-all"
+                    onClick={() => {
+                      setNotifOpen(false);
+                      navigate('/approvals');
+                    }}
+                  >
+                    Open Approvals
+                  </button>
+                </>
+              )}
+            </div>
+          )}
+        </div>
+      )}
 
       <nav className="sidebar-nav">
         {visibleItems.map(item => (
@@ -140,9 +226,8 @@ function LoginNotificationPopup() {
 
   useEffect(() => {
     const shouldShow = sessionStorage.getItem('show_login_notification') === '1';
-    const approverRoles = ['hod', 'bursar', 'dean_administration', 'dean_autonomous', 'principal'];
 
-    if (!shouldShow || !approverRoles.includes(user?.role)) return;
+    if (!shouldShow || !APPROVER_ROLES.includes(user?.role)) return;
 
     getPending()
       .then(res => {
