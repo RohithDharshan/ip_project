@@ -58,7 +58,7 @@ async def _try_advance_workflow(
     proposal: Proposal,
     step:     WorkflowStep,
     actor:    User,
-) -> None:
+) -> Optional[str]:
     """
     After an approval, check if all steps are approved.
     If so, mark proposal as approved and trigger procurement.
@@ -115,6 +115,7 @@ async def _try_advance_workflow(
                 submitter.email, submitter.name,
                 proposal.title, "approved"
             )
+        return None
     else:
         # Find next pending step
         pending = [
@@ -131,6 +132,9 @@ async def _try_advance_workflow(
                 proposal.title,
                 proposal.id,
             )
+            return next_step.approver_name or "Approver"
+
+    return None
 
 
 # ── Endpoints ─────────────────────────────────────────────────────────────────
@@ -226,18 +230,38 @@ async def decide(
     p_result = await db.execute(select(Proposal).where(Proposal.id == step.proposal_id))
     proposal = p_result.scalar_one_or_none()
 
+    submitter_result = await db.execute(select(User).where(User.id == proposal.submitted_by))
+    submitter = submitter_result.scalar_one_or_none()
+
     if data.decision == "rejected":
         proposal.status     = ProposalStatus.REJECTED
         proposal.updated_at = datetime.utcnow()
         # Notify submitter
-        u_result  = await db.execute(select(User).where(User.id == proposal.submitted_by))
-        submitter = u_result.scalar_one_or_none()
         if submitter:
             EmailService.send_status_update(
                 submitter.email, submitter.name, proposal.title, "rejected"
             )
+            EmailService.send_decision_update(
+                faculty_email   = submitter.email,
+                faculty_name    = submitter.name,
+                proposal_title  = proposal.title,
+                approver_role   = step.approver_role,
+                decision        = data.decision,
+                comments        = data.comments,
+                next_approver_name = None,
+            )
     elif data.decision == "approved":
-        await _try_advance_workflow(db, proposal, step, current_user)
+        next_approver_name = await _try_advance_workflow(db, proposal, step, current_user)
+        if submitter and proposal.status != ProposalStatus.PROCUREMENT:
+            EmailService.send_decision_update(
+                faculty_email   = submitter.email,
+                faculty_name    = submitter.name,
+                proposal_title  = proposal.title,
+                approver_role   = step.approver_role,
+                decision        = data.decision,
+                comments        = data.comments,
+                next_approver_name = next_approver_name,
+            )
 
     # Audit
     await AuditService.log(

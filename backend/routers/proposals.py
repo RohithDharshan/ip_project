@@ -214,6 +214,13 @@ async def create_proposal(
             proposal_title = proposal.title,
             proposal_id    = proposal.id,
         )
+        EmailService.send_submission_receipt(
+            faculty_email      = current_user.email,
+            faculty_name       = current_user.name,
+            proposal_title     = proposal.title,
+            proposal_id        = proposal.id,
+            first_approver_name= first_step.get("approver_name", "Approver"),
+        )
 
     return proposal
 
